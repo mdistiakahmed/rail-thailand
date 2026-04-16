@@ -3,7 +3,6 @@ import { Metadata } from "next";
 import { getAllBlogs } from "@/sanity/lib/sanity";
 import Image from "next/image";
 
-export const dynamic = "force-static";
 export const revalidate = false;
 
 export const metadata: Metadata = {

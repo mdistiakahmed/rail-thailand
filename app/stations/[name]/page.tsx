@@ -8,39 +8,6 @@ const BASE_URL = process.env.BASE_URL_FOR_STATION_DATA;
 
 export const revalidate = false;
 
-export async function generateStaticParams() {
-  try {
-    const res = await fetch(`${BASE_URL}/all-trips.json`, {
-      next: { revalidate: 86400 },
-    });
-
-    if (!res.ok) return [];
-    const data = await res.json();
-
-    // Extract unique station names from routes
-    const stationNames = new Set<string>();
-
-    data.routes.forEach((route: any) => {
-      const fromStation = route.route.split(" - ")[0];
-      // Convert station name to URL-friendly format
-      const slug = fromStation
-        .toLowerCase()
-        .replace(/\s+/g, "-")
-        .replace(/[()]/g, "")
-        .replace(/[^a-z0-9-]/g, "");
-      stationNames.add(slug);
-    });
-
-    // Convert Set back to array and return as params
-    return Array.from(stationNames).map((name) => ({
-      name: name,
-    }));
-  } catch (error) {
-    console.error("Error generating static params for stations:", error);
-    return [];
-  }
-}
-
 export async function generateMetadata({ params }: any): Promise<Metadata> {
   const { name } = await params;
 

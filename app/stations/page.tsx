@@ -5,7 +5,6 @@ import path from "path";
 import { SearchStationButton } from "./components";
 import type { Metadata } from "next";
 
-export const dynamic = "force-static";
 export const revalidate = false;
 
 export async function generateMetadata(): Promise<Metadata> {

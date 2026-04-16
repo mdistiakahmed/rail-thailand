@@ -348,19 +348,3 @@ export default async function CityRoutePage({ params }: any) {
     </div>
   );
 }
-
-// Generate static paths at build time
-export async function generateStaticParams() {
-  const schedulesDir = path.join(process.cwd(), "data", "city-schedules");
-  try {
-    const files = await fs.promises.readdir(schedulesDir);
-    return files
-      .filter((file) => file.endsWith(".json"))
-      .map((file) => ({
-        slug: file.replace(".json", ""),
-      }));
-  } catch (error) {
-    console.error("Error reading city schedules directory:", error);
-    return [];
-  }
-}

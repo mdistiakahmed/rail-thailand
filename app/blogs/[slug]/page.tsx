@@ -1,20 +1,12 @@
 // app/blogs/[slug]/page.tsx
-import { notFound } from 'next/navigation'
-import { PortableText } from '@portabletext/react'
-import { client } from '@/sanity/lib/client'
-import Image from 'next/image'
-import { urlForImage } from '@/sanity/lib/image'
-import { Metadata } from 'next'
+import { notFound } from "next/navigation";
+import { PortableText } from "@portabletext/react";
+import { client } from "@/sanity/lib/client";
+import Image from "next/image";
+import { urlForImage } from "@/sanity/lib/image";
+import { Metadata } from "next";
 
 export const revalidate = false;
-
-export async function generateStaticParams() {
-  const query = `*[_type == "blog"] {
-    "slug": slug.current
-  }`
-  const blogs = await client.fetch(query)
-  return blogs.map((blog: any) => ({ slug: blog.slug }))
-}
 
 const fetchBlogData = async (slug: any) => {
   const query = `*[_type == "blog" && slug.current == $slug][0] {
@@ -38,12 +30,12 @@ const fetchBlogData = async (slug: any) => {
     body,
     "author": author->name,
     "authorImage": author->image.asset->url
-  }`
+  }`;
 
-  const post = await client.fetch(query, { slug })
+  const post = await client.fetch(query, { slug });
 
   return post;
-}
+};
 
 /* ---------------------------
    Metadata
@@ -54,8 +46,8 @@ export async function generateMetadata({ params }: any): Promise<Metadata> {
 
   if (!post) {
     return {
-      title: 'No blog found | RailThailand',
-      description: 'The requested blog information could not be found.'
+      title: "No blog found | RailThailand",
+      description: "The requested blog information could not be found.",
     };
   }
 
@@ -66,52 +58,52 @@ export async function generateMetadata({ params }: any): Promise<Metadata> {
     title,
     description,
     alternates: {
-      canonical: `https://railthailand.com/blogs/${slug}`
+      canonical: `https://railthailand.com/blogs/${slug}`,
     },
     openGraph: {
       title,
       description,
-      type: 'website',
+      type: "website",
       images: [post.coverImage.asset.url],
-      url: `https://railthailand.com/blogs/${slug}`
-    }
+      url: `https://railthailand.com/blogs/${slug}`,
+    },
   };
 }
 
 export default async function BlogPage({ params }: any) {
-    const { slug } = await params;
+  const { slug } = await params;
 
   const post = await fetchBlogData(slug);
 
   if (!post) {
-    notFound()
+    notFound();
   }
 
   return (
     <article className="max-w-3xl mx-auto px-4 py-4">
       <div className="mb-8">
         <span className="inline-block px-3 py-1 text-sm font-medium text-blue-800 bg-blue-100 rounded-full mb-4">
-          {post.category || 'General'}
+          {post.category || "General"}
         </span>
         <h1 className="text-4xl font-bold mb-4">{post.title}</h1>
         {post.coverImage && (
-        <div className="relative w-full h-64 md:h-96 mb-6 rounded-lg overflow-hidden">
+          <div className="relative w-full h-64 md:h-96 mb-6 rounded-lg overflow-hidden">
             <Image
-            src={post.coverImage.asset.url}
-            alt={post.coverImage.alt || post.title}
-            fill
-            className="object-cover"
-            priority
-            sizes="(max-width: 768px) 100vw, 80vw"
+              src={post.coverImage.asset.url}
+              alt={post.coverImage.alt || post.title}
+              fill
+              className="object-cover"
+              priority
+              sizes="(max-width: 768px) 100vw, 80vw"
             />
-        </div>
+          </div>
         )}
         {post.publishedAt && (
           <p className="text-gray-600">
-            {new Date(post.publishedAt).toLocaleDateString('en-US', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
+            {new Date(post.publishedAt).toLocaleDateString("en-US", {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
             })}
           </p>
         )}
@@ -130,13 +122,10 @@ export default async function BlogPage({ params }: any) {
       </div>
 
       <div className="prose lg:prose-xl">
-        <PortableText
-          value={post.body}
-          components={myPortableTextComponents}
-        />
+        <PortableText value={post.body} components={myPortableTextComponents} />
       </div>
     </article>
-  )
+  );
 }
 
 // const CodeBlock = ({ value }: any) => {
@@ -234,7 +223,7 @@ const myPortableTextComponents = {
   types: {
     image: MyPortableTextImage,
     videoEmbed: MyPortableTextVideo,
-   // myCodeField: CodeBlock,
+    // myCodeField: CodeBlock,
     table: TableComponent,
   },
   marks: {
