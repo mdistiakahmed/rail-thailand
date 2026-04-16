@@ -6,7 +6,6 @@ import type { Metadata } from "next";
 
 const BASE_URL = process.env.BASE_URL_FOR_STATION_DATA;
 
-export const runtime = "edge";
 export const revalidate = false;
 
 export async function generateStaticParams() {

@@ -8,8 +8,6 @@ import { Metadata } from 'next'
 
 export const revalidate = false;
 
-export const runtime = 'edge';
-
 export async function generateStaticParams() {
   const query = `*[_type == "blog"] {
     "slug": slug.current
