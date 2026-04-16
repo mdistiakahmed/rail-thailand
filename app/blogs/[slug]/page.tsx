@@ -7,6 +7,7 @@ import { urlForImage } from "@/sanity/lib/image";
 import { Metadata } from "next";
 
 export const revalidate = false;
+export const runtime = "edge";
 
 const fetchBlogData = async (slug: any) => {
   const query = `*[_type == "blog" && slug.current == $slug][0] {

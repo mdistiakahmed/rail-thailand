@@ -20,6 +20,7 @@ import {
 } from "./component";
 
 export const revalidate = false;
+export const runtime = "edge";
 
 /* ---------------------------
    Metadata

@@ -16,7 +16,7 @@ import {
   generateRouteStructuredData,
 } from "./component";
 
-export const dynamic = "force-static";
+export const runtime = "edge";
 export const revalidate = false;
 // Add this function before the CityRoutePage component
 export async function generateMetadata({ params }: any): Promise<Metadata> {

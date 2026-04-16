@@ -7,6 +7,7 @@ import type { Metadata } from "next";
 const BASE_URL = process.env.BASE_URL_FOR_STATION_DATA;
 
 export const revalidate = false;
+export const runtime = "edge";
 
 export async function generateMetadata({ params }: any): Promise<Metadata> {
   const { name } = await params;
