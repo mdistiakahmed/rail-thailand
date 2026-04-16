@@ -7,6 +7,8 @@ const PAGE_SIZE = 1000;
 
 let cachedRoutes: string[] | null = null;
 
+export const runtime = 'edge';
+
 function getAllRouteSlugs() {
   if (cachedRoutes) return cachedRoutes;
   

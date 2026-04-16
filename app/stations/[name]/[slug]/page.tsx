@@ -5,6 +5,8 @@ import { FaTrain, FaExternalLinkAlt } from "react-icons/fa";
 import Image from "next/image";
 import { FaQuestionCircle, FaRegCommentDots } from "react-icons/fa";
 
+export const runtime = 'edge';
+
 const BASE_URL = process.env.BASE_URL_FOR_STATION_DATA;
 
 // Helper function to parse the slug into readable station names
