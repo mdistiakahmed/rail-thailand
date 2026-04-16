@@ -1,11 +1,9 @@
 import { notFound } from "next/navigation";
-import fs from "fs";
-import path from "path";
 import { FaTrain, FaExternalLinkAlt } from "react-icons/fa";
 import Image from "next/image";
 import { FaQuestionCircle, FaRegCommentDots } from "react-icons/fa";
 
-export const runtime = 'edge';
+export const runtime = "edge";
 
 const BASE_URL = process.env.BASE_URL_FOR_STATION_DATA;
 
@@ -64,14 +62,12 @@ async function getReverseRouteData(fromStation: string, toStation: string) {
 // Function to get popular destinations from a station
 async function getPopularDestinations(stationName: string, limit: number = 8) {
   try {
-    const filePath = path.join(
-      process.cwd(),
-      "data",
-      "trains-by-stations",
-      "all-trips.json",
-    );
-    const fileContents = fs.readFileSync(filePath, "utf8");
-    const data = JSON.parse(fileContents);
+    const res = await fetch(`${BASE_URL}/all-trips.json`, {
+      next: { revalidate: 86400 },
+    });
+
+    if (!res.ok) return [];
+    const data = await res.json();
 
     const destinations = data.routes
       .filter((route: any) => route.route.startsWith(`${stationName} - `))

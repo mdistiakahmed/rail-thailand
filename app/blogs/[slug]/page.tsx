@@ -6,8 +6,9 @@ import Image from 'next/image'
 import { urlForImage } from '@/sanity/lib/image'
 import { Metadata } from 'next'
 
-export const dynamic = "force-static";
 export const revalidate = false;
+
+export const runtime = 'edge';
 
 export async function generateStaticParams() {
   const query = `*[_type == "blog"] {

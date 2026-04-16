@@ -1,24 +1,22 @@
 // Create new file: app/routes/[station]/page.tsx
-import fs from "fs/promises";
-import path from "path";
 import Image from "next/image";
 import { FaTrain, FaExternalLinkAlt } from "react-icons/fa";
 import { RouteSearch } from "./components";
 import type { Metadata } from "next";
 
-export const dynamic = "force-static";
+const BASE_URL = process.env.BASE_URL_FOR_STATION_DATA;
+
+export const runtime = "edge";
 export const revalidate = false;
 
 export async function generateStaticParams() {
   try {
-    const jsonPath = path.join(
-      process.cwd(),
-      "data",
-      "trains-by-stations",
-      "all-trips.json",
-    );
-    const fileContents = await fs.readFile(jsonPath, "utf8");
-    const data = JSON.parse(fileContents);
+    const res = await fetch(`${BASE_URL}/all-trips.json`, {
+      next: { revalidate: 86400 },
+    });
+
+    if (!res.ok) return [];
+    const data = await res.json();
 
     // Extract unique station names from routes
     const stationNames = new Set<string>();
@@ -54,14 +52,12 @@ export async function generateMetadata({ params }: any): Promise<Metadata> {
     .join(" ");
 
   // Load routes to make metadata content-aware
-  const jsonPath = path.join(
-    process.cwd(),
-    "data",
-    "trains-by-stations",
-    "all-trips.json",
-  );
-  const fileContents = await fs.readFile(jsonPath, "utf8");
-  const data = JSON.parse(fileContents);
+  const res = await fetch(`${BASE_URL}/all-trips.json`, {
+    next: { revalidate: 86400 },
+  });
+
+  if (!res.ok) return {};
+  const data = await res.json();
 
   const stationRoutes = data.routes.filter((route: Route) =>
     route.route.startsWith(`${stationName} - `),
@@ -131,14 +127,12 @@ interface Route {
 
 async function getRoutesForStation(station: string): Promise<Route[]> {
   try {
-    const jsonPath = path.join(
-      process.cwd(),
-      "data",
-      "trains-by-stations",
-      "all-trips.json",
-    );
-    const fileContents = await fs.readFile(jsonPath, "utf8");
-    const data = JSON.parse(fileContents);
+    const res = await fetch(`${BASE_URL}/all-trips.json`, {
+      next: { revalidate: 86400 },
+    });
+
+    if (!res.ok) return [];
+    const data = await res.json();
 
     // Filter routes that start with the given station
     const stationRoutes = data.routes.filter((route: Route) =>

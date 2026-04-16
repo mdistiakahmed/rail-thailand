@@ -7,6 +7,8 @@ import {
   FaRegCommentDots,
 } from "react-icons/fa";
 
+export const runtime = "edge";
+
 export function generateAllRoutesSection(
   from: string,
   to: string,
