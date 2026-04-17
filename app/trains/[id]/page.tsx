@@ -19,137 +19,8 @@ import {
 } from "./component";
 
 export const runtime = 'edge';
-export const revalidate = false;
 
 
-/* ---------------------------
-   Metadata
----------------------------- */
-export async function generateMetadata({ params }: any): Promise<Metadata> {
-  const { id } = await params;
-  const trainData = await getTrainData(id);
-
-  if (!trainData) {
-    return {
-      title: "Train Not Found | RailThailand",
-      description: "The requested train information could not be found.",
-    };
-  }
-
-  const { trainData: train, scheduleData } = trainData;
-  const firstStop = scheduleData[0];
-  const lastStop = scheduleData[scheduleData.length - 1];
-  const duration = calculateDuration(
-    firstStop.depart_time,
-    lastStop.arrive_time,
-  );
-
-  const title = `Train No. ${train.train_code} Timetable: ${train.begin} to ${train.end} - Full Schedule & Duration`;
-
-  const description = `Train No. ${train.train_code} runs from ${train.begin} to ${train.end}. Departure at ${firstStop.depart_time}, arrival at ${lastStop.arrive_time}. Total travel time ${duration}. View full station schedule and operating days.`;
-
-  return {
-    title,
-    description,
-    alternates: {
-      canonical: `https://railthailand.com/trains/${id}`,
-    },
-    openGraph: {
-      title,
-      description,
-      type: "website",
-      images: "/thai-train.jpg",
-      url: `https://railthailand.com/trains/${id}`,
-    },
-  };
-}
-
-function generateScheduleDescription(train: any, scheduleData: any[]) {
-  if (!train || !scheduleData?.length) return null;
-
-  const getStopDescription = (
-    stop: any,
-    index: number,
-    isFirst: boolean,
-    isLast: boolean,
-  ) => {
-    if (isFirst) {
-      return (
-        <p className="text-gray-900 font-medium">
-          <span className="text-blue-600">Departure:</span> Train #
-          {train.train_code} ({train.train_type}) departs from{" "}
-          {stop.station_name} at{" "}
-          <span className="font-semibold">{stop.depart_time}</span>.
-        </p>
-      );
-    } else if (isLast) {
-      return (
-        <p className="text-gray-900 font-medium">
-          <span className="text-green-600">Arrival:</span> The train arrives at
-          its destination, {stop.station_name}, at{" "}
-          <span className="font-semibold">{stop.arrive_time}</span>.
-        </p>
-      );
-    } else {
-      return (
-        <p className="text-gray-700">
-          <span className="text-gray-500">•</span> Stops at {stop.station_name},
-          arriving at <span className="font-medium">{stop.arrive_time}</span>{" "}
-          and departing at{" "}
-          <span className="font-medium">{stop.depart_time}</span>.
-        </p>
-      );
-    }
-  };
-
-  return (
-    <div className="max-w-3xl mx-auto bg-white rounded-lg shadow-sm p-6">
-      <div className="mb-6">
-        <h3 className="text-xl font-bold text-gray-900 mb-3 border-b pb-2">
-          Journey Details
-        </h3>
-        <div className="space-y-4">
-          {scheduleData.map((stop, index) => {
-            const isFirst = index === 0;
-            const isLast = index === scheduleData.length - 1;
-
-            return (
-              <div
-                key={index}
-                className={`relative pl-6 pb-4 ${
-                  !isLast ? "border-l-2 border-gray-200" : ""
-                }`}
-              >
-                <div
-                  className={`absolute left-0 w-3 h-3 rounded-full ${
-                    isFirst
-                      ? "bg-blue-500"
-                      : isLast
-                        ? "bg-green-500"
-                        : "bg-gray-400"
-                  }`}
-                  style={{ left: "-6.5px", top: "6px" }}
-                />
-                <div className={`${isFirst ? "pt-0" : "pt-1"}`}>
-                  {getStopDescription(stop, index, isFirst, isLast)}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-      <div className="bg-blue-50 p-4 rounded-md">
-        <p className="text-sm text-blue-700">
-          <span className="font-medium">Note:</span> This train operates{" "}
-          {train.operatingDays?.length
-            ? `on ${train.operatingDays.join(", ")}`
-            : "daily"}
-          . Please verify the schedule before your journey as timings may vary.
-        </p>
-      </div>
-    </div>
-  );
-}
 
 export default async function TrainDetailsPage({ params }: any) {
   const { id } = await params;
@@ -172,8 +43,6 @@ export default async function TrainDetailsPage({ params }: any) {
     train.begin || "",
     8,
   );
-  const toStationRoutes = await getPopularRoutesFromStation(train.end || "", 8);
-  const travelArticles = await getPopularTravelArticles(8);
 
   const majorStops = scheduleData
     .slice(1, 6)
@@ -360,7 +229,6 @@ export default async function TrainDetailsPage({ params }: any) {
           </div>
         )}
 
-        {generateScheduleDescription(train, scheduleData)}
 
         {generateTrainFAQ(train, scheduleData, operatingDays, duration)}
 
@@ -408,106 +276,6 @@ export default async function TrainDetailsPage({ params }: any) {
                       " • Express service available"}
                     {route.slug.includes("rapid") && " • Rapid trains"}
                   </p>
-                </a>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* Popular Routes To End Station */}
-        {toStationRoutes.length > 0 && (
-          <section className="max-w-6xl mx-auto mt-12">
-            <div className="mb-8">
-              <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-4">
-                <FaTrain className="text-red-600" />
-                <span className="text-red-600">
-                  Popular Routes to {train.end}
-                </span>
-              </h2>
-              <p className="text-gray-600 mt-2">
-                Explore destinations reachable from {train.end}. These routes
-                connect to major cities and tourist destinations across
-                Thailand.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {toStationRoutes.map((route: any, index: number) => (
-                <a
-                  key={`to-route-${index}`}
-                  href={`/stations/${train.end?.toLowerCase().replace(/\s+/g, "-")}/${route.slug}`}
-                  className="group bg-white rounded-xl border border-gray-200 p-4 hover:border-red-300 hover:shadow-md transition"
-                >
-                  <div className="flex items-center gap-4 text-red-600 mb-2">
-                    <FaTrain className="text-sm" />
-                    <span className="text-sm font-medium">
-                      {train.end} → {route.name}
-                    </span>
-                  </div>
-
-                  <p className="text-sm text-gray-700 group-hover:text-red-600 font-semibold">
-                    View Train Schedule
-                  </p>
-
-                  <p className="text-xs text-gray-500 mt-1">
-                    Direct connections • Scenic routes available
-                  </p>
-                </a>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* Popular Travel Articles */}
-        {travelArticles.length > 0 && (
-          <section className="max-w-6xl mx-auto mt-12">
-            <div className="mb-8">
-              <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-4">
-                <FaTrain />
-                <span>Thailand Train Travel Guides</span>
-              </h2>
-              <p className="text-gray-600 mt-2">
-                Read expert travel tips and guides for exploring Thailand by
-                train, including route planning, station information, and travel
-                advice.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {travelArticles.map((article: any, index: number) => (
-                <a
-                  key={`article-${index}`}
-                  href={`/blogs/${article.slug}`}
-                  className="group bg-white rounded-xl border border-gray-200 overflow-hidden hover:border-purple-300 hover:shadow-md transition"
-                >
-                  {article.coverImage && (
-                    <div className="relative h-48 w-full overflow-hidden">
-                      <Image
-                        src={article.coverImage.asset.url}
-                        alt={article.coverImage.alt || article.title}
-                        fill
-                        className="object-cover group-hover:scale-105 transition-transform"
-                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
-                      />
-                    </div>
-                  )}
-
-                  <div className="p-6">
-                    <div className="flex justify-between items-start mb-2">
-                      <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">
-                        {article.category || "Travel Guide"}
-                      </span>
-                    </div>
-                    <h3 className="text-xl font-semibold text-gray-900 group-hover:text-purple-600 transition-colors line-clamp-2">
-                      {article.title}
-                    </h3>
-
-                    {article.excerpt && (
-                      <p className="mt-3 text-base text-gray-500 line-clamp-3">
-                        {article.excerpt}
-                      </p>
-                    )}
-                  </div>
                 </a>
               ))}
             </div>
