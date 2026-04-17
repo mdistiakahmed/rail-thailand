@@ -2,11 +2,13 @@ import { notFound } from "next/navigation";
 import { FaTrain, FaExternalLinkAlt } from "react-icons/fa";
 import Image from "next/image";
 import { FaQuestionCircle, FaRegCommentDots } from "react-icons/fa";
+import type { Metadata } from "next";
+import { createFilenameFromRoute } from "@/utils/stringutils";
 
 
 export const runtime = 'edge';
 
-// Helper function to parse the slug into readable station names
+
 function parseSlug(slug: string) {
   const parts = slug.split("-to-");
   if (parts.length !== 2) return null;
@@ -23,7 +25,7 @@ function parseSlug(slug: string) {
   };
 }
 
-// Function to fetch route data
+
 async function getRouteData(slug: string) {
   try {
      const res = await fetch(`https://pub-043aaddb322841a2945ec2df1e13dfaa.r2.dev/${slug}.json`, {
@@ -34,7 +36,6 @@ async function getRouteData(slug: string) {
     
         return await res.json();
   } catch (error) {
-    console.log("error.......");
     return null;
   }
 }
@@ -93,8 +94,6 @@ async function getPopularBlogs(limit: number = 8) {
   }
 }
 
-import type { Metadata } from "next";
-import { createFilenameFromRoute } from "@/utils/stringutils";
 
 export async function generateMetadata({ params }: any): Promise<Metadata> {
   const { name, slug } = await params;
@@ -218,7 +217,6 @@ const formatTime = (time: string) => {
   return `${hour12}:${minutes} ${ampm}`;
 };
 
-// Format operating days
 function formatOperatingDays(daysString: string): string {
   if (!daysString) return "N/A";
   const days = daysString.split(",").map((day) => day.trim());
@@ -238,7 +236,6 @@ export default async function StationRoutePage({ params }: any) {
     a.departure_from_current.localeCompare(b.departure_from_current),
   );
 
-  // Get related data
   const reverseRouteData = await getReverseRouteData(
     stations.from,
     stations.to,
@@ -738,10 +735,4 @@ export default async function StationRoutePage({ params }: any) {
       </div>
     </div>
   );
-}
-
-export async function generateStaticParams() {
-  // Return empty array to make pages fully dynamic
-  // This avoids the large static generation issue
-  return [];
 }
