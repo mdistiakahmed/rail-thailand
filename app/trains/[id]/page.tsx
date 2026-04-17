@@ -1,15 +1,4 @@
 // app/trains/[id]/page.tsx
-import { notFound } from "next/navigation";
-import {
-  FaTrain,
-  FaClock,
-  FaMapMarkerAlt,
-  FaArrowRight,
-  FaCalendarAlt,
-} from "react-icons/fa";
-import { Metadata } from "next";
-import Image from "next/image";
-
 export const runtime = 'edge';
 
 
