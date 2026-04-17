@@ -1,6 +1,4 @@
 // app/trains/page.tsx
-import fs from "fs";
-import path from "path";
 import Image from "next/image";
 import { Metadata } from "next";
 
@@ -42,40 +40,10 @@ interface TrainInfo {
   end: string;
 }
 
-async function getAllTrains(): Promise<{ id: string; info: TrainInfo }[]> {
-  const trainsDir = path.join(process.cwd(), "data", "trains-by-id");
-  const files = fs.readdirSync(trainsDir);
-  const trainFiles = files.filter(
-    (file) => file.startsWith("train-") && file.endsWith(".json"),
-  );
 
-  return trainFiles
-    .map((file) => {
-      const id = file.replace("train-", "").replace(".json", "");
-      const filePath = path.join(trainsDir, file);
-      const content = fs.readFileSync(filePath, "utf8");
-      const data = JSON.parse(content);
-
-      return {
-        id,
-        info: {
-          train_code: data.trainData?.train_code || "N/A",
-          train_type: data.trainData?.train_type || "N/A",
-          begin: data.trainData?.begin || "N/A",
-          end: data.trainData?.end || "N/A",
-        },
-      };
-    })
-    .sort((a, b) => {
-      // Convert train codes to numbers for proper numeric comparison
-      const codeA = parseInt(a.info.train_code, 10) || 0;
-      const codeB = parseInt(b.info.train_code, 10) || 0;
-      return codeA - codeB;
-    });
-}
 
 export default async function TrainsPage() {
-  const trains = await getAllTrains();
+  const trains = [] as any;
 
   return (
     <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
@@ -86,7 +54,7 @@ export default async function TrainsPage() {
             "@context": "https://schema.org",
             "@type": "ItemList",
             name: "Thailand Train Directory",
-            itemListElement: trains.map((train, index) => ({
+            itemListElement: trains.map((train: any, index: number) => ({
               "@type": "ListItem",
               position: index + 1,
               name: `Train ${train.info.train_code} ${train.info.begin} to ${train.info.end}`,
@@ -136,7 +104,7 @@ export default async function TrainsPage() {
           </div>
           <div className="border-t border-gray-200">
             <ul className="divide-y divide-gray-200">
-              {trains.map((train) => (
+              {trains.map((train: any) => (
                 <li key={train.id}>
                   <a
                     href={`/trains/${train.id}`}
