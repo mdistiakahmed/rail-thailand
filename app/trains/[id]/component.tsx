@@ -3,11 +3,17 @@ import path from 'path';
 import { FaQuestionCircle, FaRegCommentDots } from "react-icons/fa";
 
 
-export function getTrainData(id: string) {
+export async function getTrainData(id: string) {
   try {
-    const filePath = path.join(process.cwd(), 'data', 'trains-by-id', `train-${id}.json`);
-    const fileContent = fs.readFileSync(filePath, 'utf8');
-    return JSON.parse(fileContent);
+    const res = await fetch(`https://pub-b16deaba9c7e49db9df38e5ca073dde6.r2.dev/train-${id}.json`, {
+      next: { revalidate: 86400 }, // cache 1 day
+    });
+
+    if (!res.ok) return null;
+
+    //console.log(JSON.stringify(await res.json()));
+
+    return await res.json();
   } catch (error) {
     return null;
   }
@@ -167,14 +173,14 @@ export async function getPopularTrains(currentTrainId: string, limit: number = 1
     
     const popularTrains = allTrains.slice(startRange, endRange);
     
-    return popularTrains.map(trainId => {
-      const trainData = getTrainData(trainId.toString());
+    return await Promise.all(popularTrains.map(async trainId => {
+      const trainData = await getTrainData(trainId.toString());
       return {
         trainId: trainId.toString(),
         trainCode: trainData?.trainData?.train_code || `Train ${trainId}`,
         route: trainData?.trainData?.begin ? `${trainData.trainData.begin} to ${trainData.trainData.end}` : 'Unknown Route',
       };
-    });
+    }));
   } catch (error) {
     return [];
   }

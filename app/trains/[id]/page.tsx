@@ -18,34 +18,17 @@ import {
   getPopularTravelArticles,
   getTrainData,
 } from "./component";
-import fs from "fs";
-import path from "path";
 
 export const dynamic = "force-static";
 export const revalidate = false;
 
-export async function generateStaticParams() {
-  try {
-    const trainDir = path.join(process.cwd(), "data", "trains-by-id");
-    const files = fs.readdirSync(trainDir);
-
-    return files
-      .filter((file) => file.startsWith("train-") && file.endsWith(".json"))
-      .map((file) => ({
-        id: file.replace("train-", "").replace(".json", ""),
-      }));
-  } catch (error) {
-    console.error("Error generating static params for trains:", error);
-    return [];
-  }
-}
 
 /* ---------------------------
    Metadata
 ---------------------------- */
 export async function generateMetadata({ params }: any): Promise<Metadata> {
   const { id } = await params;
-  const trainData = getTrainData(id);
+  const trainData = await getTrainData(id);
 
   if (!trainData) {
     return {
@@ -171,7 +154,7 @@ function generateScheduleDescription(train: any, scheduleData: any[]) {
 
 export default async function TrainDetailsPage({ params }: any) {
   const { id } = await params;
-  const trainData = getTrainData(id);
+  const trainData = await getTrainData(id);
 
   if (!trainData) {
     notFound();
