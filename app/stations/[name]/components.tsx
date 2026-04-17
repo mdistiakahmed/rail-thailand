@@ -4,37 +4,28 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Autocomplete, TextField, Button, Box, Typography } from '@mui/material';
 import { FaSearch } from 'react-icons/fa';
+import { createFilenameFromRoute } from '@/utils/stringutils';
 
-interface Route {
-  route: string;
-  filename: string;
-}
-
-interface RouteSearchProps {
-  startStation: string;
-  routes: Route[];
-}
-
-export const RouteSearch: React.FC<RouteSearchProps> = ({ startStation, routes }) => {
+export const RouteSearch: React.FC<any> = ({ startStation, routes }) => {
   const router = useRouter();
   const [destinationStation, setDestinationStation] = useState('');
 
   // Get available destinations from routes
   const availableDestinations = routes
-    .filter(route => route.route.startsWith(`${startStation} - `))
-    .map(route => route.route.split(' - ')[1])
+    .filter((route: string) => route.startsWith(`${startStation} - `))
+    .map((route: string) => route.split(' - ')[1])
     .filter(Boolean);
 
   const handleSearch = () => {
     if (destinationStation) {
       // Find matching route
-      const matchingRoute = routes.find((route: Route) => {
-        const [routeStart, routeEnd] = route.route.split(' - ');
+      const matchingRoute = routes.find((route: string) => {
+        const [routeStart, routeEnd] = route.split(' - ');
         return routeStart === startStation && routeEnd === destinationStation;
       });
       
       if (matchingRoute) {
-        const slug = matchingRoute.filename.replace('.json', '');
+        const slug = createFilenameFromRoute(matchingRoute);
         const startStationSlug = startStation.toLowerCase().replace(/\s+/g, '-');
         router.push(`/stations/${startStationSlug}/${slug}`);
       } else {
@@ -77,7 +68,7 @@ export const RouteSearch: React.FC<RouteSearchProps> = ({ startStation, routes }
                 placeholder="Enter destination station"
               />
             )}
-            renderOption={(props, option) => (
+            renderOption={(props, option: string) => (
               <Box component="li" {...props}>
                 {option}
               </Box>

@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Autocomplete, TextField, Button, Box, Typography } from '@mui/material';
 import { FaSearch } from 'react-icons/fa';
+import { createFilenameFromRoute, formatStationNameForUrl } from '@/utils/stringutils';
 
 
 interface SearchStationButtonProps {
@@ -11,20 +12,6 @@ interface SearchStationButtonProps {
   routes: string[];
 }
 
-// Helper function to format station name for URL
-function formatStationNameForUrl(stationName: string): string {
-  return stationName
-    .toLowerCase()
-    .replace(/\s+/g, '-')
-    .replace(/[^a-z0-9\s-]/g, '')
-    .replace(/-+/g, '-');
-}
-
-// Helper function to create filename from route name
-function createFilenameFromRoute(routeName: string): string {
-  const [from, to] = routeName.split(' - ');
-  return `${formatStationNameForUrl(from)}-to-${formatStationNameForUrl(to)}`;
-}
 
 export const SearchStationButton: React.FC<SearchStationButtonProps> = ({ stations, routes }) => {
   const router = useRouter();

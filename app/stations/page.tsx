@@ -76,15 +76,6 @@ function groupRoutesByStartStation(routes: string[]): Record<string, string[]> {
     }, {} as any);
 }
 
-function formatStationNameForUrl(stationName: string): string {
-  return stationName
-    .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, "")
-    .replace(/\s+/g, "-");
-}
- 
-
-// Replace the main return section with this simplified version:
 
 export default async function StationsPage() {
   const routes = await getRoutes();

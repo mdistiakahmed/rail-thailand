@@ -3,6 +3,9 @@ import { FaTrain, FaExternalLinkAlt } from "react-icons/fa";
 import Image from "next/image";
 import { FaQuestionCircle, FaRegCommentDots } from "react-icons/fa";
 
+
+export const runtime = 'edge';
+
 // Helper function to parse the slug into readable station names
 function parseSlug(slug: string) {
   const parts = slug.split("-to-");
@@ -62,13 +65,13 @@ async function getPopularDestinations(stationName: string, limit: number = 8) {
     if (!res.ok) return [];
     const data = await res.json();
 
-    const destinations = data.routes
-      .filter((route: any) => route.route.startsWith(`${stationName} - `))
+    const destinations = data.allTrips
+      .filter((route: any) => route.startsWith(`${stationName} - `))
       .map((route: any) => {
-        const destination = route.route.split(" - ")[1];
+        const destination = route.split(" - ")[1];
         return {
           name: destination,
-          slug: route.filename.replace(".json", ""),
+          slug: createFilenameFromRoute(route),
         };
       })
       .slice(0, limit);
@@ -91,6 +94,7 @@ async function getPopularBlogs(limit: number = 8) {
 }
 
 import type { Metadata } from "next";
+import { createFilenameFromRoute } from "@/utils/stringutils";
 
 export async function generateMetadata({ params }: any): Promise<Metadata> {
   const { name, slug } = await params;

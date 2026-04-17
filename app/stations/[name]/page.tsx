@@ -2,9 +2,10 @@
 import fs from "fs/promises";
 import path from "path";
 import Image from "next/image";
-import { FaTrain, FaExternalLinkAlt } from "react-icons/fa";
+import { FaExternalLinkAlt } from "react-icons/fa";
 import { RouteSearch } from "./components";
 import type { Metadata } from "next";
+import { createFilenameFromRoute } from "@/utils/stringutils";
 
 export const dynamic = "force-static";
 export const revalidate = false;
@@ -23,8 +24,8 @@ export async function generateStaticParams() {
     // Extract unique station names from routes
     const stationNames = new Set<string>();
 
-    data.routes.forEach((route: any) => {
-      const fromStation = route.route.split(" - ")[0];
+    data.allTrips.forEach((route: any) => {
+      const fromStation = route.split(" - ")[0];
       // Convert station name to URL-friendly format
       const slug = fromStation
         .toLowerCase()
@@ -63,8 +64,8 @@ export async function generateMetadata({ params }: any): Promise<Metadata> {
   const fileContents = await fs.readFile(jsonPath, "utf8");
   const data = JSON.parse(fileContents);
 
-  const stationRoutes = data.routes.filter((route: Route) =>
-    route.route.startsWith(`${stationName} - `),
+  const stationRoutes = data.allTrips.filter((route: string) =>
+    route.startsWith(`${stationName} - `),
   );
 
   const totalRoutes = stationRoutes.length;
@@ -72,7 +73,7 @@ export async function generateMetadata({ params }: any): Promise<Metadata> {
   // Extract a few destination names for uniqueness
   const sampleDestinations = stationRoutes
     .slice(0, 3)
-    .map((r: Route) => r.route.split(" - ")[1])
+    .map((r: string) => r.split(" - ")[1])
     .join(", ");
 
   const title = `Train Routes from ${stationName} (${totalRoutes} Destinations) | Rail Thailand`;
@@ -124,12 +125,8 @@ export async function generateMetadata({ params }: any): Promise<Metadata> {
   };
 }
 
-interface Route {
-  route: string;
-  filename: string;
-}
 
-async function getRoutesForStation(station: string): Promise<Route[]> {
+async function getRoutesForStation(station: string): Promise<string[]> {
   try {
     const jsonPath = path.join(
       process.cwd(),
@@ -141,8 +138,8 @@ async function getRoutesForStation(station: string): Promise<Route[]> {
     const data = JSON.parse(fileContents);
 
     // Filter routes that start with the given station
-    const stationRoutes = data.routes.filter((route: Route) =>
-      route.route.startsWith(`${station} - `),
+    const stationRoutes = data.allTrips.filter((route: string) =>
+      route.startsWith(`${station} - `),
     );
 
     return stationRoutes;
@@ -190,7 +187,7 @@ export default async function RoutesPage({ params }: any) {
                 {stationName} Train Schedule & Routes to{" "}
                 {routes
                   .slice(0, 2)
-                  .map((r) => r.route.split(" - ")[1])
+                  .map((r) => r.split(" - ")[1])
                   .join(" , ")}{" "}
                 and more destinations ({routes.length} Total Destinations)
               </h1>
@@ -200,7 +197,7 @@ export default async function RoutesPage({ params }: any) {
                 {stationName} Railway Station, including{" "}
                 {routes
                   .slice(0, 3)
-                  .map((r) => r.route.split(" - ")[1])
+                  .map((r) => r.split(" - ")[1])
                   .join(", ")}{" "}
                 and other major Thailand railway destinations. This page lists
                 all available train routes, departure connections, and updated
@@ -241,12 +238,18 @@ export default async function RoutesPage({ params }: any) {
 
         <div className="space-y-4">
           {routes.length > 0 ? (
-            routes.map((route, index) => {
-              const [from, to] = route.route.split(" - ");
+            [...routes].sort((a, b) => {
+              // Sort by destination station name (the part after " - ")
+              const [, destA] = a.split(" - ");
+              const [, destB] = b.split(" - ");
+              return destA.localeCompare(destB);
+            })
+            .map((route, index) => {
+              const [from, to] = route.split(" - ");
               return (
                 <a
                   key={index}
-                  href={`/stations/${name}/${route.filename.replace(".json", "")}`}
+                  href={`/stations/${name}/${createFilenameFromRoute(route)}`}
                   className="block p-4 bg-white rounded-lg border border-gray-200 hover:border-blue-200 hover:shadow-md transition-all duration-200"
                 >
                   <div className="flex items-center justify-between">
