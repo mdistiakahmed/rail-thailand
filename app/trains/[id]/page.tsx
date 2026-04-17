@@ -14,7 +14,6 @@ import {
   generateTrainFAQ,
   generateTrainStructuredData,
   getPopularRoutesFromStation,
-  getPopularTrains,
   getPopularTravelArticles,
   getTrainData,
 } from "./component";
@@ -169,7 +168,6 @@ export default async function TrainDetailsPage({ params }: any) {
   );
 
   // Get additional data for related sections
-  const popularTrains = await getPopularTrains(id, 20);
   const fromStationRoutes = await getPopularRoutesFromStation(
     train.begin || "",
     8,
@@ -368,55 +366,6 @@ export default async function TrainDetailsPage({ params }: any) {
 
         {/* ================= RELATED SECTIONS ================= */}
 
-        {/* Popular Trains on Similar Routes */}
-        {popularTrains.length > 0 && (
-          <section className="max-w-6xl mx-auto mt-12">
-            <div className="mb-8">
-              <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-4">
-                <FaTrain className="text-blue-600" />
-                <span className="text-blue-600">
-                  Popular Trains on Similar Routes
-                </span>
-              </h2>
-              <p className="text-gray-600 mt-2">
-                Explore other trains operating on routes similar to Train{" "}
-                {train.train_code} from {train.begin} to {train.end}. These
-                trains follow similar departure patterns and schedules.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {popularTrains.map((trainInfo: any, index: number) => (
-                <a
-                  key={`train-${index}`}
-                  href={`/trains/${trainInfo.trainId}`}
-                  className="group bg-white rounded-xl border border-gray-200 p-6 hover:border-blue-300 hover:shadow-lg transition-all duration-300"
-                >
-                  <div className="flex items-center gap-3 mb-4">
-                    <FaTrain className="text-blue-500 text-xl" />
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900">
-                        Train {trainInfo.trainCode}
-                      </h3>
-                      <p className="text-sm text-gray-600 mt-1">
-                        {trainInfo.route}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="space-y-3">
-                    <p className="text-sm text-gray-700 group-hover:text-blue-600 font-semibold">
-                      View Complete Schedule
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      Timetable and route information
-                    </p>
-                  </div>
-                </a>
-              ))}
-            </div>
-          </section>
-        )}
 
         {/* Popular Routes From Start Station */}
         {fromStationRoutes.length > 0 && (

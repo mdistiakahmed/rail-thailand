@@ -1,5 +1,3 @@
-import fs from 'fs';
-import path from 'path';
 import { FaQuestionCircle, FaRegCommentDots } from "react-icons/fa";
 
 
@@ -154,44 +152,17 @@ export function generateTrainFAQ(
 }
 
 
-// Function to get popular trains on similar routes
-export async function getPopularTrains(currentTrainId: string, limit: number = 10) {
-  try {
-    const trainDir = path.join(process.cwd(), 'data', 'trains-by-id');
-    const files = fs.readdirSync(trainDir);
-    
-    const allTrains = files
-      .filter(file => file.startsWith('train-') && file.endsWith('.json'))
-      .map(file => parseInt(file.replace('train-', '').replace('.json', '')))
-      .sort((a, b) => a - b);
-    
-    const currentIndex = allTrains.indexOf(parseInt(currentTrainId));
-    
-    // Get 10 trains before and after current train
-    const startRange = Math.max(0, currentIndex - limit);
-    const endRange = Math.min(allTrains.length, currentIndex + limit);
-    
-    const popularTrains = allTrains.slice(startRange, endRange);
-    
-    return await Promise.all(popularTrains.map(async trainId => {
-      const trainData = await getTrainData(trainId.toString());
-      return {
-        trainId: trainId.toString(),
-        trainCode: trainData?.trainData?.train_code || `Train ${trainId}`,
-        route: trainData?.trainData?.begin ? `${trainData.trainData.begin} to ${trainData.trainData.end}` : 'Unknown Route',
-      };
-    }));
-  } catch (error) {
-    return [];
-  }
-}
 
 // Function to get popular routes from a station
 export async function getPopularRoutesFromStation(stationName: string, limit: number = 8) {
   try {
-    const filePath = path.join(process.cwd(), 'data', 'trains-by-stations', 'all-trips.json');
-    const fileContents = fs.readFileSync(filePath, 'utf8');
-    const data = JSON.parse(fileContents);
+
+     const res = await fetch(`https://pub-043aaddb322841a2945ec2df1e13dfaa.r2.dev/all-trips.json`, {
+      next: { revalidate: 86400 }, // cache 1 day
+    });
+
+    if (!res.ok) return [];
+    const data = await res.json();
     
     const routes = data.routes
       .filter((route: any) => route.route.startsWith(`${stationName} - `))
