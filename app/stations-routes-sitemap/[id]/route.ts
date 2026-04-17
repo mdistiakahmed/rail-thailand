@@ -1,27 +1,35 @@
 import { NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
 import { createFilenameFromRoute } from '@/utils/stringutils';
 
-export const dynamic = "force-static";
-export const revalidate = false;
+export const runtime = 'edge';
 
 const BASE_URL = 'https://railthailand.com';
 const PAGE_SIZE = 1000;
 
 let cachedRoutes: string[] | null = null;
+const CDN_BASE_URL = "https://cdn.railthailand.com";
 
-function getAllRouteSlugs() {
+async function getAllRouteSlugs() {
+  try {
   if (cachedRoutes) return cachedRoutes;
-  
-  const filePath = path.join(process.cwd(), 'data', 'trains-by-stations', 'all-trips.json');
-  const data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+
+  const res = await fetch(`${CDN_BASE_URL}/all-trips.json`, {
+    next: { revalidate: 86400 }, // cache 1 day
+  });
+    
+  if (!res.ok) return null;
+
+  const data = await res.json();
   cachedRoutes = data.allTrips.map((route: string) => createFilenameFromRoute(route));
   return cachedRoutes;
+
+  } catch (error) {
+    return null;
+  }
 }
 
 export async function generateSitemaps() {
-  const routes = getAllRouteSlugs();
+  const routes = await getAllRouteSlugs();
   const total = Math.ceil(routes!.length / PAGE_SIZE);
   return Array.from({ length: total }).map((_, i) => ({ id: i }));
 }
@@ -30,7 +38,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
   const { id } = await params;
   const idNum = parseInt(id);
   
-  const routes = getAllRouteSlugs();
+  const routes = await getAllRouteSlugs();
   const start = idNum * PAGE_SIZE;
   const end = start + PAGE_SIZE;
   const subset = routes!.slice(start, end);
