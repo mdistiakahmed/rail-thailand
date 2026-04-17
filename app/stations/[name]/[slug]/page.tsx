@@ -8,6 +8,8 @@ import { createFilenameFromRoute } from "@/utils/stringutils";
 
 export const runtime = 'edge';
 
+const BASE_URL = "https://cdn.railthailand.com";
+
 
 function parseSlug(slug: string) {
   const parts = slug.split("-to-");
@@ -28,7 +30,7 @@ function parseSlug(slug: string) {
 
 async function getRouteData(slug: string) {
   try {
-     const res = await fetch(`https://pub-043aaddb322841a2945ec2df1e13dfaa.r2.dev/${slug}.json`, {
+     const res = await fetch(`${BASE_URL}/${slug}.json`, {
           next: { revalidate: 86400 }, // cache 1 day
         });
     
@@ -44,7 +46,7 @@ async function getRouteData(slug: string) {
 async function getReverseRouteData(fromStation: string, toStation: string) {
   try {
     const reverseSlug = `${toStation.toLowerCase().replace(/\s+/g, "-")}-to-${fromStation.toLowerCase().replace(/\s+/g, "-")}`;
-    const res = await fetch(`https://pub-043aaddb322841a2945ec2df1e13dfaa.r2.dev/${reverseSlug}.json`, {
+    const res = await fetch(`${BASE_URL}/${reverseSlug}.json`, {
           next: { revalidate: 86400 }, // cache 1 day
         });
     
@@ -59,7 +61,7 @@ async function getReverseRouteData(fromStation: string, toStation: string) {
 // Function to get popular destinations from a station
 async function getPopularDestinations(stationName: string, limit: number = 8) {
   try {
-    const res = await fetch(`https://pub-043aaddb322841a2945ec2df1e13dfaa.r2.dev/all-trips.json`, {
+    const res = await fetch(`${BASE_URL}/all-trips.json`, {
         next: { revalidate: 86400 }, // cache 1 day
       });
     
