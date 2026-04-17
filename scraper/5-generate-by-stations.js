@@ -164,21 +164,23 @@ async function generateStationPairSchedules() {
             if (schedules.length > 0) {
                 const firstSchedule = schedules[0];
                 const routeName = `${firstSchedule.begin_station_name} - ${firstSchedule.end_station_name}`;
-                const filename = `${formatStationName(firstSchedule.begin_station_name)}-to-${formatStationName(firstSchedule.end_station_name)}.json`;
+                ///const filename = `${formatStationName(firstSchedule.begin_station_name)}-to-${formatStationName(firstSchedule.end_station_name)}.json`;
                 
-                allTrips.push({
-                    route: routeName,
-                    filename: filename
-                });
+                // allTrips.push({
+                //     route: routeName,
+                //     filename: filename
+                // });
+                allTrips.push(routeName);
             }
         }
 
         // Sort all trips by route name
-        allTrips.sort((a, b) => a.route.localeCompare(b.route));
+        //allTrips.sort((a, b) => a.route.localeCompare(b.route));
+         allTrips.sort((a, b) => a.localeCompare(b.route));
 
         // Save all-trips.json
         const allTripsFile = path.join(OUTPUT_DIR, 'all-trips.json');
-        await fs.writeFile(allTripsFile, JSON.stringify({ routes: allTrips }, null, 2));
+        await fs.writeFile(allTripsFile, JSON.stringify({ allTrips }, null, 2));
         console.log(`\n✅ Generated all-trips.json with ${allTrips.length} routes`);
         
         console.log(`\nSuccessfully created ${filesCreated} station pair schedule files!`);
