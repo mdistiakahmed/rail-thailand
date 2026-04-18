@@ -5,7 +5,7 @@ import { MetadataRoute } from "next";
 export const dynamic = "force-static";
 export const revalidate = false;
 
-const BASE_URL = "https://railthailand.com";
+const BASE_URL = "https://www.railthailand.com";
 
 function getCities() {
   const citiesDir = path.join(process.cwd(), "data", "city-schedules");

@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import { MetadataRoute } from "next";
 
-const BASE_URL = "https://railthailand.com";
+const BASE_URL = "https://www.railthailand.com";
 
 function getStations() {
 

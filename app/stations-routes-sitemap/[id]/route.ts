@@ -3,7 +3,7 @@ import { createFilenameFromRoute } from '@/utils/stringutils';
 
 export const runtime = 'edge';
 
-const BASE_URL = 'https://railthailand.com';
+const BASE_URL = 'https://www.railthailand.com';
 const PAGE_SIZE = 1000;
 
 let cachedRoutes: string[] | null = null;
